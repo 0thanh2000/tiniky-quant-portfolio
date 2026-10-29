@@ -124,9 +124,7 @@ class _MainScreenState extends State<MainScreen>
         ),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark
+          c
                   ? FluentColors.darkMica
                   : FluentColors.lightMica,
               border: Border(
