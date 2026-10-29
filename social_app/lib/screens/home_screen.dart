@@ -10,12 +10,6 @@ import '../main.dart';
 import '../utils/cache_helper.dart';
 import '../utils/cloudinary_helper.dart';
 import '../widgets/verified_badge.dart';
-import 'create_post_screen.dart';
-import 'edit_post_screen.dart';
-import 'comments_sheet.dart';
-import 'chat_list_screen.dart';
-import 'search_screen.dart';
-import 'user_profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -123,13 +117,7 @@ class _HomeScreenState extends State<HomeScreen>
         _isOffline = false;
       });
 
-      await CacheHelper.savePosts(postsList);
-    } catch (e) {
-      debugPrint('❌ Lỗi fetch posts: $e');
-      if (_posts.isNotEmpty) {
-        if (mounted) setState(() => _isOffline = true);
-      } else {
-        await _loadFromCache();
+
       }
     } finally {
       _fetching = false;
@@ -210,18 +198,7 @@ class _HomeScreenState extends State<HomeScreen>
         setState(() => _bookmarkedIds.remove(postId));
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đã bỏ lưu bài viết')),
-        );
-      } else {
-        await supabase
-            .from('bookmarks')
-            .insert({'user_id': me, 'post_id': postId});
-        if (!mounted) return;
-        setState(() => _bookmarkedIds.add(postId));
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã lưu bài viết')),
-        );
-      }
-    } catch (e) {
+  
       debugPrint('Lỗi bookmark: $e');
     }
   }
@@ -334,15 +311,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
-    final me = supabase.auth.currentUser!.id;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? FluentColors.darkBg : FluentColors.lightBg,
-      body: SafeArea(
-        child: Column(
-          children: [
             // TOP BAR
             Container(
               padding:
@@ -425,10 +394,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       child: const Icon(FluentIcons.add_24_filled,
                           color: Colors.white, size: 26),
-                    ),
-                  ),
-                ],
-              ),
+   
             ),
 
             // SEARCH BAR
@@ -490,13 +456,7 @@ class _HomeScreenState extends State<HomeScreen>
                           if (index == _posts.length + 1) return TextButton(onPressed: () { _postLimit += 30; _fetchPosts(); }, child: const Text('Xem thêm bài viết'));
                           final post = _posts[index - 1];
                           final profile = post['profiles'] ?? {};
-                          final likes = (post['likes'] as List?) ?? [];
-                          final comments =
-                              (post['comments'] as List?) ?? [];
-                          final isLiked =
-                              likes.any((like) => like['user_id'] == me);
-                          final isMyPost = post['user_id'] == me;
-                          final isBookmarked =
+
                               _bookmarkedIds.contains(post['id']);
 
                           return _PostCard(
@@ -549,10 +509,7 @@ class _HomeScreenState extends State<HomeScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
+
         ],
       ),
       child: Row(
@@ -616,10 +573,7 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildMyAvatar(String me, bool isDark, double radius) {
     final myPost = _posts.firstWhere(
       (p) => p['user_id'] == me,
-      orElse: () => {},
-    );
-    final myProfile = myPost['profiles'] ?? {};
-    final avatarUrl = myProfile['avatar_url'];
+
 
     return CircleAvatar(
       radius: radius,
@@ -733,11 +687,7 @@ class _PostCard extends StatelessWidget {
             color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
             blurRadius: 15,
             offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+ 
         children: [
           Padding(
             padding: const EdgeInsets.all(14),
@@ -748,10 +698,7 @@ class _PostCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(2),
                     decoration: const BoxDecoration(
-                      gradient: AppGradients.primaryGradient,
-                      shape: BoxShape.circle,
-                    ),
-                    child: CircleAvatar(
+
                       radius: 20,
                       backgroundColor: Colors.white,
                       backgroundImage: profile['avatar_url'] != null
