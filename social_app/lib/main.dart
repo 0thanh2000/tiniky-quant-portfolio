@@ -7,9 +7,6 @@ import 'package:audio_session/audio_session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
-import 'screens/notifications_screen.dart';
-import 'theme.dart';
-
 // ============================================
 // CẤU HÌNH
 // ============================================
@@ -45,9 +42,6 @@ Future<void> main() async {
     debugPrint('🎨 Loaded theme: ${themeModeNotifier.value}');
 
     // ⭐ LẮNG NGHE THAY ĐỔI THEME → lưu vào prefs
-    themeModeNotifier.addListener(() {
-      final mode = themeModeNotifier.value;
-      final value = mode == ThemeMode.dark ? 'dark' : 'light';
       prefs.setString(_themePrefKey, value);
       debugPrint('🎨 Saved theme: $value');
     });
@@ -77,45 +71,7 @@ Future<void> main() async {
     ));
     debugPrint('✅ AudioSession configured');
   } catch (e) {
-    debugPrint('⚠️ AudioSession error: $e');
-  }
 
-  // ⭐ SUPABASE
-  await Supabase.initialize(
-    url: supabaseUrl,
-    publishableKey: supabasePublishableKey,
-  );
-  debugPrint('✅ Supabase initialized');
-
-  // ⭐ ONESIGNAL
-  OneSignal.initialize(oneSignalAppId);
-  OneSignal.Notifications.requestPermission(true);
-  debugPrint('✅ OneSignal initialized');
-
-  // ⭐ SETUP CLICK HANDLER (DEEP LINK)
-  _setupOneSignalClickHandler();
-
-  await AppLinksService.start();
-  runApp(const MyApp());
-}
-
-// ============================================
-// ⭐ ONESIGNAL CLICK HANDLER — D.1
-// ============================================
-void _setupOneSignalClickHandler() {
-  // ⭐ LẮNG NGHE CLICK NOTIFICATION (khi app bị kill hoặc background)
-  OneSignal.Notifications.addClickListener((event) {
-    debugPrint('🔔 User bấm notification!');
-    final data = event.notification.additionalData;
-    debugPrint('   Data: $data');
-
-    // Điều hướng tới Notifications screen
-    _navigateToNotifications();
-  });
-
-  // ⭐ LẮNG NGHE FOREGROUND NOTIFICATION (app đang mở)
-  OneSignal.Notifications.addForegroundWillDisplayListener((event) {
-    debugPrint('🔔 Nhận notification khi app đang mở');
     event.notification.display();
   });
 }

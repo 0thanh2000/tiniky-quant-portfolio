@@ -30,12 +30,6 @@ class _FriendsScreenState extends State<FriendsScreen>
 
   @override
   void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _init();
-  }
-
-  @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
@@ -76,10 +70,6 @@ class _FriendsScreenState extends State<FriendsScreen>
               'user_id, profiles!user_id(id, username, avatar_url, bio, is_verified, verified_type)')
           .eq('friend_id', me)
           .eq('status', 'accepted');
-
-      final friendsList = <Map<String, dynamic>>[];
-      for (final f in friends1) {
-        friendsList.add(Map<String, dynamic>.from(f['profiles'] ?? {}));
       }
       for (final f in friends2) {
         friendsList.add(Map<String, dynamic>.from(f['profiles'] ?? {}));
@@ -115,14 +105,6 @@ class _FriendsScreenState extends State<FriendsScreen>
 
       final allFriendships = await _supabase
           .from('friendships')
-          .select('user_id, friend_id')
-          .or('user_id.eq.$me,friend_id.eq.$me');
-
-      final excludeIds = <String>{me};
-      for (final f in allFriendships) {
-        excludeIds.add(f['user_id']);
-        excludeIds.add(f['friend_id']);
-      }
 
       final suggestionsRes = await _supabase
           .from('profiles')
@@ -156,13 +138,6 @@ class _FriendsScreenState extends State<FriendsScreen>
     }
   }
 
-  Future<void> _loadFromCache() async {
-    try {
-      final cached = await CacheHelper.getFriends();
-      if (!mounted) return;
-      setState(() {
-        _friends = cached;
-        _isLoading = false;
         _isOffline = true;
       });
       debugPrint('📱 Đã load ${cached.length} bạn bè từ cache');
@@ -200,11 +175,6 @@ class _FriendsScreenState extends State<FriendsScreen>
     }
   }
 
-  Future<void> _sendRequest(Map<String, dynamic> user) async {
-    try {
-      await _supabase.rpc('app_request_friend', params: {'other_user': user['id']});
-      _fetchAll();
-    } catch (e) {
       debugPrint('Lỗi gửi lời mời: $e');
     }
   }
@@ -244,12 +214,6 @@ class _FriendsScreenState extends State<FriendsScreen>
               ),
               if (_isOffline) ...[
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,

@@ -5,9 +5,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/post_media.dart';
 import '../services/media_service.dart';
 import '../widgets/media_gallery.dart';
-
-class CreatePostScreen extends StatefulWidget {
-  final Map<String, dynamic>? post;
   const CreatePostScreen({super.key, this.post});
   @override State<CreatePostScreen> createState() => _CreatePostScreenState();
 }
@@ -47,12 +44,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     } catch (e) { _error(e); }
   }
   Future<void> _save() async {
-    if (_busy) return;
     final db = Supabase.instance.client;
     final user = db.auth.currentUser;
-    if (user == null) { _error('Bạn cần đăng nhập lại.'); return; }
-    final content = _content.text.trim();
-    if (content.isEmpty && _existing.isEmpty && _selected.isEmpty) { _error('Nhập nội dung hoặc chọn ảnh/video.'); return; }
+    if (user == null) { _error('Bạn cần đăng nhập lại.'); return; }ảnh/video.'); return; }
     setState(() { _busy = true; _status = 'Đang chuẩn bị...'; });
     try {
       final media = List<PostMedia>.from(_existing);

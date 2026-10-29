@@ -22,9 +22,7 @@ import 'widgets/profile_tabs.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool isActive;
-  const ProfileScreen({super.key, this.isActive = true});
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  const ProfileScreen({super.
 }
 
 class _ProfileScreenState extends State<ProfileScreen>
@@ -88,9 +86,6 @@ class _ProfileScreenState extends State<ProfileScreen>
       final user = _supabase.auth.currentUser;
       if (user == null) return;
 
-      final profile = await _supabase
-          .from('profiles')
-          .select()
           .eq('id', user.id)
           .single();
 
@@ -125,11 +120,6 @@ class _ProfileScreenState extends State<ProfileScreen>
       });
       _animController.forward();
 
-      await CacheHelper.saveProfile(profile);
-    } catch (e) {
-      debugPrint('❌ Lỗi tải profile: $e');
-      if (_profile != null) {
-        if (mounted) setState(() => _isOffline = true);
       } else {
         await _loadFromCache();
       }
@@ -162,13 +152,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       MaterialPageRoute(
         builder: (_) => EditProfileScreen(
           profile: _profile,
-          onlyAvatar: onlyAvatar,
-          onlyCover: onlyCover,
-        ),
-      ),
-    );
-    if (result == true) _fetchAll();
-  }
+          onlyAvatar: onlyAvat
 
   Future<void> _handleDeletePost(Map<String, dynamic> post) async {
     final confirm = await showDialog<bool>(
@@ -198,13 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen>
           final uri = Uri.parse(url);
           final pathSegments = uri.pathSegments;
           final postsIndex = pathSegments.indexOf('posts');
-          if (postsIndex >= 0 && postsIndex + 2 < pathSegments.length) {
-            final storagePath =
-                pathSegments.sublist(postsIndex + 1).join('/');
-            await _supabase.storage.from('posts').remove([storagePath]);
-          }
-        } catch (e) {
-          debugPrint('Không xóa được ảnh: $e');
+          if (postsIndex >= 0 && postsInde
         }
       }
 
@@ -231,11 +209,6 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   void _openFollowers(String type) {
-    final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return;
-
-    Navigator.push(
-      context,
       MaterialPageRoute(
         builder: (_) => FollowersScreen(userId: userId, type: type),
       ),
@@ -261,21 +234,13 @@ class _ProfileScreenState extends State<ProfileScreen>
           slivers: [
             ProfileHeader(
               profile: _profile,
-              onEditAvatar: () => _openEditProfile(onlyAvatar: true),
-              onEditCover: () => _openEditProfile(onlyCover: true),
-              onSettings: () {
-                Navigator.push(
-                  context,
+              onEditAvatar: () => _openE
                   MaterialPageRoute(builder: (_) => const SettingsScreen()),
                 );
               },
             ),
             SliverToBoxAdapter(child: _buildNameSection(isDark)),
-            SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: OutlinedButton.icon(icon: const Icon(Icons.edit_note), label: const Text('Bạn đang nghĩ gì? Đăng bài viết'),
-                onPressed: () async {
-                  final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => const CreatePostScreen()));
-                  if (result == true) _fetchAll();
+            SliverToBoxAdapter(
                 }))),
             SliverPersistentHeader(
               pinned: true,
@@ -306,10 +271,6 @@ class _ProfileScreenState extends State<ProfileScreen>
       ),
     );
   }
-
-  Widget _buildNameSection(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Column(
         children: [
           Row(
@@ -409,10 +370,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: FluentColors.accentDark, // ⭐ Xanh đậm
                       foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(FluentRadius.medium),
                       ),
                     ),
                   ),
@@ -482,8 +439,6 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget _buildStat(String label, int count, bool isDark, {String? type}) {
     final isClickable = type != null;
     return GestureDetector(
-      onTap: isClickable ? () => _openFollowers(type) : null,
-      behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Column(

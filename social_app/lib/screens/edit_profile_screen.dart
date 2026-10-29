@@ -4,11 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme.dart';
 
-class EditProfileScreen extends StatefulWidget {
-  final Map<String, dynamic>? profile;
-  final bool onlyAvatar;
-  final bool onlyCover;
-
+class EditProfileScreen extends
   const EditProfileScreen({
     super.key,
     required this.profile,
@@ -45,11 +41,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         TextEditingController(text: widget.profile?['hometown'] ?? '');
     _currentCity = TextEditingController(
         text: widget.profile?['current_city'] ?? '');
-    _work = TextEditingController(text: widget.profile?['work'] ?? '');
-    _education =
-        TextEditingController(text: widget.profile?['education'] ?? '');
-    _relationship = TextEditingController(
-        text: widget.profile?['relationship_status'] ?? '');
 
     if (widget.onlyAvatar) {
       WidgetsBinding.instance
@@ -89,12 +80,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final bytes = await picked.readAsBytes();
       if (!mounted) return;
       setState(() => _coverBytes = bytes);
-    }
-  }
-
-  // ============================================
-  // SAVE
-  // ============================================
   Future<void> _save() async {
     if (_isSaving) return;
     // Kiểm tra nếu là onlyCover/onlyAvatar thì phải có ảnh
@@ -127,10 +112,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (_avatarBytes != null) {
         final path =
             '${user.id}/avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        await _supabase.storage
-            .from('avatars')
-            .uploadBinary(path, _avatarBytes!);
-        avatarUrl = _supabase.storage.from('avatars').getPublicUrl(path);
       }
 
       // Upload cover
@@ -160,10 +141,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         updateData['relationship_status'] = _relationship.text.trim();
       }
 
-      await _supabase
-          .from('profiles')
-          .update(updateData)
-          .eq('id', user.id);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

@@ -5,9 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:video_player/video_player.dart';
 import '../models/post_media.dart';
-
-class MediaService {
-  static const maxImages = 10;
   static const maxImageBytes = 10 * 1024 * 1024;
   static const maxVideoBytes = 50 * 1024 * 1024;
   static const maxVideoSeconds = 60;
@@ -23,10 +20,7 @@ class MediaService {
       try {
         await controller.initialize().timeout(const Duration(seconds: 20));
         if (controller.value.duration.inMilliseconds <= 0 ||
-            controller.value.duration > const Duration(seconds: maxVideoSeconds)) {
-          throw Exception('Vui lòng chọn video dài tối đa 60 giây.');
-        }
-      } finally { await controller.dispose(); }
+            controller.value.duration > const Duration(seconds: maxVideoSeconds)
     }
   }
 
