@@ -3,13 +3,6 @@ import '../widgets/social_post_card.dart';
 import '../models/post_media.dart';
 import '../widgets/media_gallery.dart';
 import '../services/share_service.dart';
-import 'profile_friends_section.dart';
-import 'create_post_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../theme.dart';
-import '../widgets/verified_badge.dart';
 import '../utils/cloudinary_helper.dart';
 import 'chat_screen.dart';
 import 'edit_profile_screen.dart';
@@ -50,10 +43,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> _fetchAll() async {
-    try {
-      final me = _supabase.auth.currentUser?.id;
-      if (me == null) return;
-
       _isMyProfile = (me == widget.userId);
 
       final profile = await _supabase
@@ -89,9 +78,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       final posts = await _supabase
           .from('posts')
           .select('*, likes(user_id), comments(id)')
-          .eq('user_id', widget.userId)
-          .order('created_at', ascending: false);
-
       final videos = await _supabase
           .from('videos')
           .select('*, video_likes(user_id), video_comments(id)')
@@ -116,9 +102,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Future<void> _toggleFollow() async {
     if (_isProcessing || _isMyProfile) return;
     setState(() => _isProcessing = true);
-
-    final me = _supabase.auth.currentUser!.id;
-
     try {
       if (_isFollowing) {
         await _supabase
@@ -138,10 +121,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         if (!mounted) return;
         setState(() {
           _isFollowing = true;
-          _followerCount++;
-        });
-
-                // ⭐ Lấy username thật của mình
         final myProfile = await _supabase
             .from('profiles')
             .select('username')
@@ -174,10 +153,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       if (!mounted) return;
       await _fetchAll();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã gửi lời mời kết bạn!'),
-          backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
@@ -202,12 +177,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             child: const Text('Hủy'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Đồng ý',
-                style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
     );
 
     if (confirm != true) return;
@@ -232,12 +201,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         const SnackBar(
           content: Text('Đã hủy kết bạn'),
           backgroundColor: Colors.orange,
-        ),
-      );
-    } catch (e) {
-      debugPrint('Lỗi hủy kết bạn: $e');
-    } finally {
-      if (mounted) setState(() => _isProcessing = false);
     }
   }
 
@@ -269,12 +232,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     if (_isMyProfile) return;
 
     try {
-      final conversationId = await ConversationService.open(widget.userId);
-
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
           builder: (_) => ChatScreen(
             conversationId: conversationId,
             otherUserName: _profile?['username'] ?? 'Người dùng',
@@ -306,11 +263,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         builder: (_) => FollowersScreen(
           userId: widget.userId,
           type: type,
-        ),
-      ),
-    ).then((_) => _fetchAll());
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -350,12 +302,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 photoCount: _photos.length,
               ),
             ),
-          ),
-          if (_selectedTab == 0)
-            ..._buildPostsSliver(isDark)
-          else if (_selectedTab == 1)
-            ..._buildPhotosSliver(isDark)
-          else if (_selectedTab == 2)
             ..._buildVideosSliver(isDark)
           else if (_selectedTab == 3)
             SliverToBoxAdapter(child: _buildAboutSection(isDark))
@@ -390,13 +336,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (coverUrl != null && coverUrl.toString().isNotEmpty)
-                    CachedNetworkImage(
-                      imageUrl: CloudinaryHelper.coverPhoto(coverUrl),
-                      fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => Container(
-                        decoration: const BoxDecoration(
-                          gradient: AppGradients.primaryGradient,
                         ),
                       ),
                     )
@@ -439,9 +378,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                   color: Colors.white, size: 22),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -471,11 +407,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           ? CachedNetworkImageProvider(
                               CloudinaryHelper.avatarLarge(avatarUrl))
                           : null,
-                      child: avatarUrl == null || avatarUrl.toString().isEmpty
-                          ? const Icon(Icons.person,
-                              size: 56, color: Colors.white)
-                          : null,
-                    ),
                   ),
                 ),
               ),
@@ -516,10 +447,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ),
           if ((_profile?['bio'] ?? '').toString().isNotEmpty) ...[
             const SizedBox(height: 6),
-            Text(
-              _profile!['bio'],
-              textAlign: TextAlign.center,
-              style: TextStyle(
                 fontSize: 14,
                 color: isDark
                     ? FluentColors.darkSubText
@@ -556,16 +483,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       children: [
         Expanded(
           child: SizedBox(
-            height: 48,
             child: ElevatedButton.icon(
               onPressed: _openEditProfile,
               icon: const Icon(Icons.edit_outlined,
                   color: Colors.white, size: 18),
               label: const Text(
                 'Chỉnh sửa',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
                   fontSize: 15,
                   letterSpacing: 0.2,
                 ),
