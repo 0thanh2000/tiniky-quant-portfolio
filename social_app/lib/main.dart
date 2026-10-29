@@ -7,9 +7,6 @@ import 'package:audio_session/audio_session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
-import 'screens/notifications_screen.dart';
-import 'theme.dart';
-
 // ============================================
 // CẤU HÌNH
 // ============================================
@@ -45,9 +42,6 @@ Future<void> main() async {
     debugPrint('🎨 Loaded theme: ${themeModeNotifier.value}');
 
     // ⭐ LẮNG NGHE THAY ĐỔI THEME → lưu vào prefs
-    themeModeNotifier.addListener(() {
-      final mode = themeModeNotifier.value;
-      final value = mode == ThemeMode.dark ? 'dark' : 'light';
       prefs.setString(_themePrefKey, value);
       debugPrint('🎨 Saved theme: $value');
     });
