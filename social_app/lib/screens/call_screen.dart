@@ -1,10 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'feed_screen.dart';
-
-/// Foreground 1:1 WebRTC calls. Signaling is authorized by participant-only RPCs.
 class CallScreen extends StatefulWidget {
   static bool active = false;
   final String conversationId, otherId, name;
@@ -43,11 +39,6 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     super.initState(); WidgetsBinding.instance.addObserver(this);
     _id = widget.incoming?['id']?.toString();
     _label = widget.incoming == null ? 'Đang chuẩn bị...' : 'Cuộc gọi đến';
-    _lastContact = DateTime.now();
-    _pollTimer = Timer.periodic(const Duration(seconds: 2), (_) => _poll());
-    if (widget.incoming == null) _start();
-  }
-  @override void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) _poll();
     // This version deliberately ends calls when the app is backgrounded.
     // Native background ringing/CallKit is a separate deployment integration.
@@ -87,12 +78,6 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     };
     peer.onConnectionState = (state) {
       if (_ending || !mounted) return;
-      if (state == RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
-        _connectedAt ??= DateTime.now();
-        setState(() { _connected = true; _label = 'Đã kết nối'; });
-      } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
-        _fail('Không kết nối được. Kiểm tra TURN và mạng của hai thiết bị.');
-      } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected) {
         setState(() => _label = 'Kết nối bị gián đoạn...');
       }
     };
@@ -124,9 +109,6 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   Future<void> _accept() async {
     if (_accepting || _ending) return;
     setState(() { _accepting = true; _label = 'Đang kết nối...'; });
-    try {
-      await _prepare(); if (_ending) return;
-      final row = await _db.from('app_calls').select().eq('id', _id!).single();
       if (row['status'] != 'ringing') throw Exception('Cuộc gọi đã kết thúc.');
       await _peer!.setRemoteDescription(RTCSessionDescription(row['offer'] as String, 'offer'));
       _remoteSet = true; _remoteSetAt = DateTime.now();
