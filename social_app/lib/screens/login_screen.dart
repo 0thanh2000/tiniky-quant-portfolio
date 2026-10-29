@@ -22,11 +22,7 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+    _animContr
       CurvedAnimation(parent: _animController, curve: Curves.easeOut),
     );
     _slideAnim = Tween<Offset>(
@@ -63,13 +59,7 @@ class _LoginScreenState extends State<LoginScreen>
     }
   }
 
-  void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: AppColors.likeRed,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
+
             borderRadius: BorderRadius.circular(12)),
       ),
     );
@@ -99,11 +89,7 @@ class _LoginScreenState extends State<LoginScreen>
                         width: 90,
                         height: 90,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(28),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 1.5,
+           
                           ),
                         ),
                         child: const Icon(
@@ -135,9 +121,7 @@ class _LoginScreenState extends State<LoginScreen>
                       // ===== GLASS CARD =====
                       ClipRRect(
                         borderRadius: BorderRadius.circular(24),
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
+                
                             color: Colors.white.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
@@ -164,9 +148,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     _obscurePassword
                                         ? Icons.visibility_outlined
                                         : Icons.visibility_off_outlined,
-                                    color: Colors.white70,
-                                  ),
-                                  onPressed: () => setState(() =>
+              =>
                                       _obscurePassword = !_obscurePassword),
                                 ),
                               ),
@@ -192,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen>
                                           height: 24,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2.5,
-                                            color: AppColors.gradStart,
+
                                           ),
                                         )
                                       : const Text(
