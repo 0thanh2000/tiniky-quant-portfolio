@@ -356,11 +356,6 @@ class _FeedScreenState extends State<FeedScreen>
   }
 
   Future<void> _resumeCurrentVideo() async {
-    if (_videos.isEmpty) return;
-    if (_currentIndex >= _videos.length) return;
-
-    final url = _videos[_currentIndex]['video_url'] as String?;
-    if (url == null) return;
 
     try {
       final c = VideoPreloader.get(url);
@@ -521,15 +516,7 @@ class _FeedScreenState extends State<FeedScreen>
           ),
         ],
       ),
-    );
-  }
-}
 
-// ============================================
-// VIDEO ITEM
-// ============================================
-class _VideoItem extends StatefulWidget {
-  final Map<String, dynamic> video;
   final bool isActive;
 
   const _VideoItem({
@@ -561,10 +548,6 @@ class _VideoItemState extends State<_VideoItem> {
     return (widget.video['music_volume'] as num?)?.toDouble() ?? 1.0;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initVideo();
     _initMusic();
     _fetchLikeData();
   }
@@ -615,15 +598,7 @@ class _VideoItemState extends State<_VideoItem> {
     if (c == null || !VideoPreloader.isAlive(c)) return;
     try {
       c.play();
-    } catch (_) {}
-    try {
-      _audioPlayer?.play();
-    } catch (_) {}
-  }
-
-  void _safePause() {
-    final c = _controller;
-    if (c != null && VideoPreloader.isAlive(c)) {
+    
       try {
         c.pause();
       } catch (_) {}
@@ -671,12 +646,7 @@ class _VideoItemState extends State<_VideoItem> {
       _controller = loaded;
       try {
         await _controller!.setVolume(_originalVolume);
-      } catch (_) {}
 
-      if (!mounted || _isDisposed) return;
-      setState(() {
-        _isInitialized = true;
-        _isOffline = false;
       });
       if (widget.isActive) _safePlay();
     } catch (e) {
