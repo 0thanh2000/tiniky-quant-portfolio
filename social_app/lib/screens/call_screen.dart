@@ -145,14 +145,7 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       // ICE is essential; surface failure instead of showing a false connected state.
       if (!_ending) _fail('Lỗi trao đổi kết nối cuộc gọi. Vui lòng thử lại.');
     }
-  }
-  Future<void> _poll() async {
-    if (_id == null || _ending || _polling) return;
-    _polling = true;
-    try {
-      final row = await _db.from('app_calls').select().eq('id', _id!).single();
-      _lastContact = DateTime.now();
-      if (_ending) return;
+
       final status = row['status'];
       if (status != 'ringing' && status != 'accepted') { await _finish(status.toString(), remote: true); return; }
       final expires = DateTime.parse(row['expires_at']);
@@ -238,12 +231,7 @@ class _CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
           else ...[
             _button(_muted ? Icons.mic_off : Icons.mic, 'Mic', Colors.white24, () async {
               if (_stream == null) return;
-              setState(() => _muted = !_muted);
-              for (final track in _stream!.getAudioTracks()) { track.enabled = !_muted; }
-            }),
-            _button(_speaker ? Icons.volume_up : Icons.hearing, 'Loa', Colors.white24, () async {
-              try { await Helper.setSpeakerphoneOn(!_speaker); if (mounted) setState(() => _speaker = !_speaker); } catch (_) {}
-            }),
+     
             if (widget.video) _button(_cameraOff ? Icons.videocam_off : Icons.videocam, 'Camera', Colors.white24, () async {
               if (_stream == null) return;
               setState(() => _cameraOff = !_cameraOff);
