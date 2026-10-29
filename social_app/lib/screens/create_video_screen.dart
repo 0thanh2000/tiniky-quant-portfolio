@@ -3,12 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:video_player/video_player.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:video_compress/video_compress.dart';
-import 'package:audio_session/audio_session.dart';
-import 'feed_screen.dart'; // ⭐ Để truy cập VideoPreloader
-
 
 class CreateVideoScreen extends StatefulWidget {
   const CreateVideoScreen({super.key});
@@ -52,9 +46,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
   String _uploadStatus = '';
 
   int _currentStep = 0;
-
-  // FIX AUDIO FOCUS
-  bool _shouldVideoPlay = true;
   DateTime? _lastResumeAttempt;
 
   @override
@@ -85,10 +76,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
   }
 
   // ============================================
-  // CẤU HÌNH AUDIO SESSION
-  // ============================================
-  Future<void> _configureAudioSession() async {
-    try {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration(
         avAudioSessionCategory: AVAudioSessionCategory.playback,
@@ -121,12 +108,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
       final response = await _supabase
           .from('music')
           .select()
-          .order('title', ascending: true);
-
-      final valid = <Map<String, dynamic>>[];
-      for (final m in response) {
-        final url = m['audio_url']?.toString() ?? '';
-        if (url.isNotEmpty) {
           valid.add(Map<String, dynamic>.from(m));
         }
       }
@@ -164,9 +145,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
         source: ImageSource.gallery,
         maxDuration: const Duration(seconds: 60),
       );
-      if (picked != null) {
-        await _loadVideo(File(picked.path));
-      }
     } catch (e) {
       _showError('Không thể chọn: $e');
     }
@@ -234,12 +212,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
   // SYNC PLAY/PAUSE
   // ============================================
   Future<void> _syncPlay() async {
-    _shouldVideoPlay = true;
-    if (_videoController == null || !_isVideoReady) return;
-
-    try {
-      await _videoController!.play();
-    } catch (_) {}
 
     if (_selectedMusic != null) {
       try {
@@ -278,12 +250,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
     if (_videoController!.value.isPlaying) {
       _syncPause();
     } else {
-      _syncPlay();
-    }
-  }
-
-  // ============================================
-  // ÂM LƯỢNG
   // ============================================
   void _onOriginalVolumeChanged(double v) {
     setState(() => _originalVolume = v);
@@ -317,12 +283,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
       final url = music['audio_url']?.toString() ?? '';
       if (url.isEmpty) {
         _showError('Nhạc không có URL hợp lệ');
-        return;
-      }
-
-      final session = await AudioSession.instance;
-      await session.configure(const AudioSessionConfiguration(
-        androidAudioFocusGainType:
             AndroidAudioFocusGainType.gainTransientMayDuck,
         androidWillPauseWhenDucked: false,
         androidAudioAttributes: AndroidAudioAttributes(
@@ -357,10 +317,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
       debugPrint('🎵 Đã chọn: ${music['title']} (${duration?.inSeconds}s)');
     } catch (e) {
       debugPrint('Lỗi phát nhạc: $e');
-      _showError('Không thể phát nhạc này');
-      if (mounted) setState(() => _selectedMusic = null);
-      await _syncPlay();
-    }
   }
 
   // ============================================
@@ -398,10 +354,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
             ),
             const SizedBox(height: 8),
             ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Colors.grey,
-                child: Icon(Icons.music_off, color: Colors.white),
-              ),
               title: const Text(
                 'Không có nhạc',
                 style: TextStyle(color: Colors.white),
@@ -424,21 +376,6 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
                               'Chưa có nhạc nào.\nVui lòng upload nhạc lên Supabase.',
                               style: TextStyle(
                                   color: Colors.white54, fontSize: 13),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: _musicList.length,
-                          itemBuilder: (context, i) {
-                            final music = _musicList[i];
-                            final isSelected =
-                                _selectedMusic?['id'] == music['id'];
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: isSelected
-                                    ? const Color(0xFFFE2C55)
-                                    : Colors.grey[800],
                                 child: const Icon(Icons.music_note,
                                     color: Colors.white),
                               ),
@@ -477,20 +414,11 @@ class _CreateVideoScreenState extends State<CreateVideoScreen> {
   void _openAudioSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => StatefulBuilder(
-        builder: (context, setSheetState) => Container(
           padding: const EdgeInsets.all(20),
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
