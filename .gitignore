@@ -1,0 +1,10 @@
+*.env
+.env*
+*.log
+*.p12
+*.pem
+*.key
+*.keystore
+**/google-services.json
+**/GoogleService-Info.plist
+**/.temp/
