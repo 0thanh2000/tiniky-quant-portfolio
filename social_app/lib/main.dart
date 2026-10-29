@@ -77,45 +77,7 @@ Future<void> main() async {
     ));
     debugPrint('✅ AudioSession configured');
   } catch (e) {
-    debugPrint('⚠️ AudioSession error: $e');
-  }
 
-  // ⭐ SUPABASE
-  await Supabase.initialize(
-    url: supabaseUrl,
-    publishableKey: supabasePublishableKey,
-  );
-  debugPrint('✅ Supabase initialized');
-
-  // ⭐ ONESIGNAL
-  OneSignal.initialize(oneSignalAppId);
-  OneSignal.Notifications.requestPermission(true);
-  debugPrint('✅ OneSignal initialized');
-
-  // ⭐ SETUP CLICK HANDLER (DEEP LINK)
-  _setupOneSignalClickHandler();
-
-  await AppLinksService.start();
-  runApp(const MyApp());
-}
-
-// ============================================
-// ⭐ ONESIGNAL CLICK HANDLER — D.1
-// ============================================
-void _setupOneSignalClickHandler() {
-  // ⭐ LẮNG NGHE CLICK NOTIFICATION (khi app bị kill hoặc background)
-  OneSignal.Notifications.addClickListener((event) {
-    debugPrint('🔔 User bấm notification!');
-    final data = event.notification.additionalData;
-    debugPrint('   Data: $data');
-
-    // Điều hướng tới Notifications screen
-    _navigateToNotifications();
-  });
-
-  // ⭐ LẮNG NGHE FOREGROUND NOTIFICATION (app đang mở)
-  OneSignal.Notifications.addForegroundWillDisplayListener((event) {
-    debugPrint('🔔 Nhận notification khi app đang mở');
     event.notification.display();
   });
 }
