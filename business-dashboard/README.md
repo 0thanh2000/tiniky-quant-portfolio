@@ -1,6 +1,6 @@
 # Business performance dashboard
 
-An interactive Python and Streamlit portfolio demo for exploring business orders. **All records are synthetic** and the project is not presented as a client engagement or actual business performance.
+
 
 ![Dashboard preview](dashboard-preview.png)
 
